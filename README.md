@@ -5,11 +5,12 @@
 ![Dashboard Preview](https://img.shields.io/badge/Status-Live%20Demo-brightgreen?style=for-the-badge)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 **A real-time IoT Intrusion Detection System (IDS) with ML-based threat classification, automated SOAR response, and a live monitoring dashboard.**
 
-[🚀 Live Demo](https://iot-security-monitoring-threat-detection-platform-dashboard.vercel.app) &nbsp;|&nbsp; [📺 Watch Attack Simulation](#demo-walkthrough) &nbsp;|&nbsp; [⚙️ Run Locally](#running-the-demo-locally)
+[🚀 Live Demo](https://iot-threat-detection-dashboard.onrender.com) &nbsp;|&nbsp; [📺 Watch Attack Simulation](#attack-simulation-script) &nbsp;|&nbsp; [⚙️ Run Locally](#running-the-demo-locally)
 
 </div>
 
@@ -23,6 +24,7 @@
 - [Demo vs Real System](#demo-vs-real-system-comparison)
 - [Tech Stack](#tech-stack)
 - [Running the Demo Locally](#running-the-demo-locally)
+- [Deploy on Render](#deploy-on-render)
 - [Attack Simulation Script](#attack-simulation-script)
 - [Real System Deployment](#real-system-deployment)
 - [Project Structure](#project-structure)
@@ -79,9 +81,12 @@ The system was built as a **Final Year Project (FYP)** and targets real-world sm
 │                      DEMO VERSION                               │
 │                                                                 │
 │         node demo-server.js (single Node.js process)           │
-│         ├── Port 3000 → Serves React dashboard (static)        │
-│         ├── Port 8000 → Mock REST API + WebSocket              │
-│         └── Port 9090 → Mock Prometheus metrics                │
+│         │                                                       │
+│         └── Single port (PORT env var, default 3000)           │
+│              ├── /api/*   → Mock REST API                      │
+│              ├── /ws      → WebSocket live feed                │
+│              ├── /prom/*  → Prometheus metrics mock            │
+│              └── /*       → React SPA (dashboard/build)        │
 │                                                                 │
 │         Pre-seeded with ~60–120 realistic alerts               │
 │         New alert streamed via WebSocket every 4 seconds       │
@@ -185,12 +190,35 @@ node demo-server.js
 
 **Windows users** — you can also double-click `START-DEMO.bat` which automatically opens the browser for you.
 
-The server starts three services:
-- `http://localhost:3000` — Dashboard UI
-- `http://localhost:8000` — REST API (alerts, SOAR, system status)
-- `http://localhost:9090` — Prometheus metrics mock
+Everything runs on a single port — `http://localhost:3000` serves the dashboard, API, WebSocket, and Prometheus mock all together.
 
 > No `npm install` needed. The React app is pre-built in `dashboard/build/` and served statically by `demo-server.js`.
+
+---
+
+## Deploy on Render
+
+The easiest way to share a live link with anyone — no hardware required.
+
+### Steps
+
+1. Go to [render.com](https://render.com) and sign up / log in with GitHub
+2. Click **"New +"** → **"Web Service"**
+3. Connect your GitHub repo: `IoT-Security-Monitoring-Threat-Detection-Platform-Dashboard`
+4. Use these settings:
+
+| Field | Value |
+|-------|-------|
+| **Runtime** | `Node` |
+| **Build Command** | *(leave empty)* |
+| **Start Command** | `node demo-server.js` |
+| **Instance Type** | `Free` |
+
+5. Click **"Create Web Service"** — deploys in ~2 minutes
+
+Render automatically sets the `PORT` environment variable and the server picks it up. WebSocket, REST API, and the React dashboard all work on the single Render URL.
+
+> Free tier instances spin down after 15 minutes of inactivity. First load after inactivity may take ~30 seconds to wake up.
 
 ---
 
@@ -267,7 +295,8 @@ bash infrastructure/scripts/start_pipeline.sh
 
 ```
 .
-├── demo-server.js          # Complete demo backend (mock API + WebSocket + Prometheus)
+├── demo-server.js          # Complete demo backend (single-port: API + WebSocket + Prometheus + static)
+├── render.yaml             # Render deployment config
 ├── START-DEMO.bat          # Windows one-click launcher
 ├── START-DEMO.ps1          # PowerShell launcher
 ├── fake-attack.ps1         # Theatrical attack simulator (Windows)
