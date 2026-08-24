@@ -1,1 +1,156 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>IoT IDS Dashboard</title><style>body{margin:0;background:#0d0d1a}*{box-sizing:border-box}</style><script defer="defer" src="/static/js/main.6ae31183.js"></script></head><body><div id="root"></div></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/><title>IoT IDS Dashboard</title><style>
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; overflow-x: hidden; max-width: 100vw; background: #0d0d1a; }
+
+/* ── Recharts responsive fix ── */
+.recharts-wrapper, .recharts-surface { max-width: 100% !important; }
+
+/* ── Touch-friendly buttons ── */
+@media (max-width: 600px) {
+  button { min-height: 38px; }
+}
+
+/* ── Tables: always scrollable on narrow screens ── */
+@media (max-width: 768px) {
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+}
+
+/* ── Canvas (network topology) ── */
+canvas { max-width: 100%; }
+
+/* ── Global keyframes kept from original ── */
+@keyframes pulseBadge {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+</style>
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Responsive layout patcher
+// React renders layout via inline styles (JS objects). We watch the DOM and
+// patch gridTemplateColumns / padding on resize so the dashboard works on
+// phones and tablets without rebuilding the React source.
+// ─────────────────────────────────────────────────────────────────────────────
+(function () {
+  'use strict';
+
+  var BREAKPOINT_TABLET = 900;
+  var BREAKPOINT_MOBILE = 600;
+
+  function applyResponsive() {
+    var w = window.innerWidth;
+
+    // ── App shell ──────────────────────────────────────────────────────────
+    // The outermost div has: background:#080812, minHeight:"100vh", padding:"12px 16px"
+    var shells = document.querySelectorAll('div[style]');
+    shells.forEach(function (el) {
+      var s = el.style;
+      // Identify main shell by its minHeight:100vh + background
+      if (s.minHeight === '100vh') {
+        if (w <= BREAKPOINT_MOBILE) {
+          s.padding = '8px 6px';
+        } else if (w <= BREAKPOINT_TABLET) {
+          s.padding = '10px 10px';
+        } else {
+          s.padding = '12px 16px';
+        }
+      }
+
+      // ── Main 3-column grid (2fr 1fr 1fr) → single column on tablet/mobile ──
+      if (s.gridTemplateColumns === '2fr 1fr 1fr') {
+        if (w <= BREAKPOINT_TABLET) {
+          s.gridTemplateColumns = '1fr';
+          s.gridTemplateRows = 'auto';
+          // Remove grid spans from children
+          Array.from(el.children).forEach(function (child) {
+            if (child.style) {
+              child.style.gridRow = '';
+              child.style.gridColumn = '';
+            }
+          });
+        } else {
+          s.gridTemplateColumns = '2fr 1fr 1fr';
+          s.gridTemplateRows = 'auto auto auto';
+        }
+      }
+
+      // ── SOAR 2-column grid (1fr 1fr) → single column on mobile ──
+      if (s.gridTemplateColumns === '1fr 1fr') {
+        if (w <= BREAKPOINT_MOBILE) {
+          s.gridTemplateColumns = '1fr';
+        } else {
+          s.gridTemplateColumns = '1fr 1fr';
+        }
+      }
+
+      // ── Header flex row: allow wrap on mobile ──
+      if (s.display === 'flex' && s.justifyContent === 'space-between') {
+        if (w <= BREAKPOINT_MOBILE) {
+          s.flexWrap = 'wrap';
+          s.gap = s.gap || '8px';
+        }
+      }
+
+      // ── Flex button/filter rows: wrap on mobile ──
+      if (s.display === 'flex' && s.alignItems === 'center' && s.gap) {
+        if (w <= BREAKPOINT_MOBILE) {
+          s.flexWrap = 'wrap';
+        }
+      }
+
+      // ── Panel height: remove fixed heights on mobile so content fits ──
+      if (s.height && s.height !== 'auto' && parseInt(s.height) > 200) {
+        if (w <= BREAKPOINT_MOBILE) {
+          el.dataset.origHeight = el.dataset.origHeight || s.height;
+          s.height = 'auto';
+          s.minHeight = el.dataset.origHeight;
+        } else if (el.dataset.origHeight) {
+          s.height = el.dataset.origHeight;
+          s.minHeight = '';
+        }
+      }
+    });
+  }
+
+  // Run once after React mounts (React renders after DOMContentLoaded)
+  function runAfterMount() {
+    applyResponsive();
+    // Re-run every 200ms for 3s to catch React re-renders / late mounts
+    var count = 0;
+    var timer = setInterval(function () {
+      applyResponsive();
+      count++;
+      if (count >= 15) clearInterval(timer);
+    }, 200);
+  }
+
+  // MutationObserver: re-patch whenever React updates the DOM
+  var observer = new MutationObserver(function () {
+    applyResponsive();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    runAfterMount();
+    observer.observe(document.getElementById('root'), {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style']
+    });
+  });
+
+  // Re-patch on resize
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(applyResponsive, 100);
+  });
+})();
+</script>
+<script defer="defer" src="/static/js/main.6ae31183.js"></script></head><body><div id="root"></div></body></html>
