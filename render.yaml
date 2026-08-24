@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: iot-threat-detection-dashboard
+    runtime: node
+    buildCommand: echo "No build needed — pre-built React app included"
+    startCommand: node demo-server.js
+    envVars:
+      - key: PORT
+        value: 10000
+    autoDeploy: true
