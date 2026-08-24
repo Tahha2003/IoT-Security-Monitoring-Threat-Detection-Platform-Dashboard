@@ -1,0 +1,60 @@
+# -----------------------------
+# 🔐 ENV & SECRETS
+# -----------------------------
+.env
+.env.*
+!.env.example
+!dashboard/.env.example
+
+# -----------------------------
+# 🐍 PYTHON
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# -----------------------------
+# 📦 NODE / DASHBOARD
+# -----------------------------
+node_modules/
+dashboard/node_modules/
+.cache/
+
+# Keep the pre-built React app so Vercel/demo can serve it
+!dashboard/build/
+!dashboard/build/**
+
+# -----------------------------
+# 📁 LOG FILES
+# -----------------------------
+logs/
+*.log
+
+# -----------------------------
+# 🧪 TEST OUTPUT
+# -----------------------------
+coverage/
+.pytest_cache/
+
+# -----------------------------
+# 🧠 IDE / EDITOR
+# -----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# 🐳 DOCKER (FUTURE)
+# -----------------------------
+*.env.docker

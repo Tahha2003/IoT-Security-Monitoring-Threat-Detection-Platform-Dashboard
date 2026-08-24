@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "iot-threat-detection-dashboard",
+  "builds": [
+    {
+      "src": "demo-server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "demo-server.js"
+    }
+  ]
+}
